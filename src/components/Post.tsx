@@ -6,37 +6,37 @@ import ptBR from "date-fns/locale/pt-BR";
 import { Avatar } from "./Avatar";
 import { Comment } from "./Comment";
 import styles from "./Post.module.css";
-import PropTypes from "prop-types";
 
-Post.propTypes = {
-  author: PropTypes.shape({
-    avatarUrl: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    role: PropTypes.string.isRequired,
-  }).isRequired,
-  content: PropTypes.arrayOf(
-    PropTypes.shape({
-      type: PropTypes.oneOf(["paragraph", "link"]).isRequired,
-      content: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  publishedAt: PropTypes.instanceOf(Date).isRequired,
-};
+interface Author {
+  avatarUrl: string;
+  name: string;
+  role: string;
+}
 
-export function Post({
-  author,
-  publishedAt,
-  content,
-}: PropTypes.InferProps<typeof Post.propTypes>) {
+interface Content {
+  type: "paragraph" | "link";
+  content: string;
+}
+export interface PostType {
+  id: number;
+  author: Author;
+  publishedAt: Date;
+  content: Content[];
+}
+interface PostProps {
+  post: PostType;
+}
+
+export function Post({ post }: PostProps) {
   const [comments, setComments] = useState(["Post, muito bacana, hein?!"]);
 
   const publishedDateFormatted = format(
-    publishedAt,
+    post.publishedAt,
     "d 'de' LLLL 'às' HH:mm'h'",
     { locale: ptBR }
   );
 
-  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
+  const publishedDateRelativeToNow = formatDistanceToNow(post.publishedAt, {
     locale: ptBR,
     addSuffix: true,
   });
@@ -72,21 +72,21 @@ export function Post({
     <article className={styles.post}>
       <header>
         <div className={styles.author}>
-          <Avatar src={author.avatarUrl} />
+          <Avatar src={post.author.avatarUrl} />
           <div className={styles.authorInfo}>
-            <strong>{author.name}</strong>
-            <span>{author.role}</span>
+            <strong>{post.author.name}</strong>
+            <span>{post.author.role}</span>
           </div>
         </div>
         <time
           title={publishedDateFormatted}
-          dateTime={publishedAt.toISOString()}
+          dateTime={post.publishedAt.toISOString()}
         >
           {publishedDateRelativeToNow}
         </time>
       </header>
       <div className={styles.content}>
-        {content.map((line) => {
+        {post.content.map((line) => {
           if (line!.type === "paragraph") {
             return <p key={line!.content}>{line!.content}</p>;
           } else if (line!.type === "link") {
